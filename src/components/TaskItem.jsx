@@ -1,40 +1,85 @@
 import React from "react";
-import { useRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import { taskAtom } from "../atoms/taskAtom";
-import { Trash2, Archive, Check } from "lucide-react";
 import { toast } from "react-toastify";
 
-export default function TaskItem({ task }) {
-  const [tasks, setTasks] = useRecoilState(taskAtom);
+export default function TaskItem({ task, setEditTask }) {
+  const setTasks = useSetRecoilState(taskAtom);
 
-  const updateStatus = (status) => {
-    setTasks(tasks.map(t => t.id === task.id ? { ...t, status } : t));
-    toast.info(`Task marked as ${status}`);
+  const handleDelete = () => {
+    setTasks(prev => prev.filter(t => t.id !== task.id));
+    toast.info("Task deleted");
   };
 
-  const deleteTask = () => {
-    setTasks(tasks.filter(t => t.id !== task.id));
-    toast.error("Task deleted");
+  const handleComplete = () => {
+    setTasks(prev =>
+      prev.map(t => (t.id === task.id ? { ...t, status: "completed" } : t))
+    );
+    toast.success("Task marked as completed");
+  };
+
+  const handleArchive = () => {
+    setTasks(prev =>
+      prev.map(t => (t.id === task.id ? { ...t, status: "archived" } : t))
+    );
+    toast.success("Task archived");
+  };
+
+  const handleEdit = () => {
+    if (setEditTask) {
+      setEditTask(task);
+      toast.info("Task ready to edit");
+    }
   };
 
   return (
-    <div className="border p-4 rounded shadow-sm mb-2">
-      <h3 className="text-lg font-semibold">{task.title}</h3>
+    <div className="bg-white p-4 rounded shadow mb-3">
+      <h3 className="font-bold text-lg">{task.title}</h3>
       <div dangerouslySetInnerHTML={{ __html: task.description }} />
-      <div className="flex gap-2 mt-2">
-        {task.status !== "completed" && (
-          <button onClick={() => updateStatus("completed")} className="text-green-600">
-            <Check size={18} />
-          </button>
+
+      <div className="mt-3 space-x-4">
+        {/* Conditionally render buttons based on task status */}
+        {task.status === "pending" && (
+          <>
+            <button onClick={handleEdit} className="text-blue-500 hover:underline">
+              ✏️ Edit
+            </button>
+            <button onClick={handleComplete} className="text-green-600 hover:underline">
+              ✅ Complete
+            </button>
+            <button onClick={handleArchive} className="text-yellow-600 hover:underline">
+              📦 Archive
+            </button>
+            <button onClick={handleDelete} className="text-red-500 hover:underline">
+              ❌ Delete
+            </button>
+          </>
         )}
-        {task.status !== "archived" && (
-          <button onClick={() => updateStatus("archived")} className="text-yellow-600">
-            <Archive size={18} />
-          </button>
+
+        {task.status === "completed" && (
+          <>
+            <button onClick={handleArchive} className="text-yellow-600 hover:underline">
+              📦 Archive
+            </button>
+            <button onClick={handleDelete} className="text-red-500 hover:underline">
+              ❌ Delete
+            </button>
+          </>
         )}
-        <button onClick={deleteTask} className="text-red-600">
-          <Trash2 size={18} />
-        </button>
+
+        {task.status === "archived" && (
+          <>
+            <button onClick={handleEdit} className="text-blue-500 hover:underline">
+              ✏️ Edit
+            </button>
+            <button onClick={handleComplete} className="text-green-600 hover:underline">
+              ✅ Complete
+            </button>
+            <button onClick={handleDelete} className="text-red-500 hover:underline">
+              ❌ Delete
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

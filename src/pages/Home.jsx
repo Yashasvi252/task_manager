@@ -23,40 +23,43 @@ export default function Home() {
     );
   };
 
+  const handleComplete = (id) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, status: "completed" } : task
+      )
+    );
+  };
+
+  // Filter out only pending tasks for this page
+  const pendingTasks = tasks.filter((task) => task.status === "pending");
+
   return (
     <div>
       <TaskForm editTask={editTask} setEditTask={setEditTask} />
 
-      <h2 className="text-xl mt-6 mb-2 font-bold">Tasks:</h2>
+      <h2 className="text-xl mt-6 mb-2 font-bold">Pending Tasks:</h2>
       <ul className="space-y-3">
-        {tasks
-          .filter((task) => task.status === "pending")
-          .map((task) => (
-            <li key={task.id} className="bg-white p-4 rounded shadow">
-              <h3 className="font-semibold">{task.title}</h3>
-              <div dangerouslySetInnerHTML={{ __html: task.description }} />
-              <div className="mt-2 space-x-2">
-                <button
-                  onClick={() => handleEdit(task)}
-                  className="text-blue-500 hover:underline"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleArchive(task.id)}
-                  className="text-yellow-500 hover:underline"
-                >
-                  Archive
-                </button>
-                <button
-                  onClick={() => handleDelete(task.id)}
-                  className="text-red-500 hover:underline"
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
+        {pendingTasks.map((task) => (
+          <li key={task.id} className="bg-white p-4 rounded shadow">
+            <h3 className="font-semibold">{task.title}</h3>
+            <div dangerouslySetInnerHTML={{ __html: task.description }} />
+            <div className="mt-2 space-x-4">
+              <button onClick={() => handleEdit(task)} className="text-blue-500 hover:underline">
+                ✏️ Edit
+              </button>
+              <button onClick={() => handleComplete(task.id)} className="text-green-600 hover:underline">
+                ✅ Complete
+              </button>
+              <button onClick={() => handleArchive(task.id)} className="text-yellow-600 hover:underline">
+                📦 Archive
+              </button>
+              <button onClick={() => handleDelete(task.id)} className="text-red-500 hover:underline">
+                ❌ Delete
+              </button>
+            </div>
+          </li>
+        ))}
       </ul>
     </div>
   );
